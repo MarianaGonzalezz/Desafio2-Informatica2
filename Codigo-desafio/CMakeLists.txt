@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(Codigo-desafio main.cpp
-    datos.h datos.cpp)
+    datos.h datos.cpp
+    grupo.h grupo.cpp)
 
 include(GNUInstallDirs)
 install(TARGETS Codigo-desafio
