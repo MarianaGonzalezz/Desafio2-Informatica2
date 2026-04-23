@@ -61,9 +61,9 @@ void jugador::actualizarEstadisticas(int golesPartido, int asistenciasPartido,
 
 // Getters
 
-string jugador:: getNombre() const { return nombre; }
-string jugador:: getApellido() const { return apellido; }
-int jugador:: getnumeroCamiseta() const { return numeroCamiseta; }
+string jugador::getNombre() const { return nombre; }
+string jugador::getApellido() const { return apellido; }
+int jugador::getnumeroCamiseta() const { return numeroCamiseta; }
 int jugador::getPartidosJugados() const { return partidosJugados; }
 int jugador::getGoles() const { return goles; }
 int jugador::getMinutosTotales() const { return minutosTotales; }
@@ -115,7 +115,7 @@ void jugador::setFaltasAcumuladas(int f){
 }
 
 
-void jugador:: mostrar() const{
+void jugador::mostrar() const{
     cout << "Jugador: " << nombre << " " << apellido
          << " (#" << numeroCamiseta << ")\n";
     cout << "  Partidos: " << partidosJugados << " | Goles: " << goles
