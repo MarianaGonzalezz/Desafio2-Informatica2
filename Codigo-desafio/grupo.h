@@ -27,10 +27,10 @@ public:
     void generarPartidos();
     void simularPartidos();
 
-    void calcularTabla();
     void ordenarTabla();
 
-    void mostrarGrupo;
+    equipo* obtenerClasificados();
+    void mostrarGrupo();
 };
 
 #endif // GRUPO_H
