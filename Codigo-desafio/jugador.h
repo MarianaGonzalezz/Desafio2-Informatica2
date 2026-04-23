@@ -1,11 +1,14 @@
 #ifndef JUGADOR_H
 #define JUGADOR_H
 
+#include <string>
+using namespace std;
+
 
 class jugador{
 private:
-    char* nombre;
-    char* apellido;
+    string nombre;
+    string apellido;
     int numeroCamiseta;
 
     // estadisticas
@@ -17,10 +20,7 @@ private:
     int tarjetasRojas;
     int faltasAcumuladas;
 
-    // metodos auxiliares
-    int longitudCadena(const char* cadena);
-    char* copiarCadena(const char* origen);
-    void liberarMemoria();
+
 
 public:
 
@@ -28,7 +28,7 @@ public:
 
     jugador();
 
-    jugador(const char* nom, const char* ap, int num);
+    jugador(string nom, string ap, int num);
 
     jugador(const jugador& otro);
 
@@ -46,38 +46,32 @@ public:
                                 int minutosPartido, int amarillasPartido,
                                 int rojasPartido, int faltasPartido);
 
-    void anotaGol();
-    void agregarAsistencia();
-    void recibirTarjetaAmarilla();
-    void recibirTarjetaRoja();
-    void agregarFalta();
-    void agregarMinutos(int minutos);
-
 
 
     // Getters
 
-    const char* getNombre() const;
-    const char* getApellido() const;
+    string getNombre() const;
+    string getApellido() const;
     int getnumeroCamiseta() const;
     int getPartidosJugados() const;
     int getGoles() const;
     int getMinutosTotales() const;
     int getAsistencias() const;
-    int getTarjetasAmarillas() const;
-    int getTarjetasRojas() const;
+    int getAmarillas() const;
+    int getRojas() const;
     int getFaltasAcumuladas() const;
 
     // Setters
 
-    void setNombre(const char* nombre);
-    void setApellido(const char* apellido);
+    void setNombre(string nom);
+    void setApellido(string ap);
     void setNumeroCamiseta(int num);
+    void setPartidosJugados(int pj);
     void setGoles(int goles);
     void setAsistencias(int asistencias);
     void setMinutosTotales(int m);
-    void setTarjetasAmarillas(int ta);
-    void setTarjetasRojas(int tr);
+    void setAmarillas(int ta);
+    void setRojas(int tr);
     void setFaltasAcumuladas(int f);
 
     void mostrar() const;
