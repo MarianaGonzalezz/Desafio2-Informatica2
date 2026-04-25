@@ -18,8 +18,15 @@ eliminatorias::eliminatorias(string nombreFase) {
 
 ///Destructor
 eliminatorias::~eliminatorias(){
-    if(partidos != nullptr)
+    if(partidos != nullptr){
         delete[] partidos;
+        restarMemoriaHeap(sizeof(partido) * numPartidos);
+    }
+
+    if(clasificados != nullptr){
+        delete[] clasificados;
+        restarMemoriaHeap(sizeof(equipo) * numEquipos);
+    }
 }
 
 void eliminatorias::setEquipos(equipo* equipos, int n) {
@@ -30,6 +37,7 @@ void eliminatorias::setEquipos(equipo* equipos, int n) {
 void eliminatorias::crearCruces(){
     numPartidos = numEquipos/2;
     partidos = new partido[numPartidos];
+    sumarMemoriaHeap(sizeof(partido) * numPartidos);
 
     for (int i = 0; i< numEquipos/2; i++){
         partidos[i] = partido(&clasificados[i], &clasificados[numEquipos -1-i]);
@@ -37,6 +45,8 @@ void eliminatorias::crearCruces(){
 }
 
 void eliminatorias::resolverEmpate(partido &p){
+    entrarFuncion(sizeof(int)*2 + sizeof(equipo*)*2);
+
     int g1 = p.getGoles1();
     int g2 = p.getGoles2();
 
@@ -51,12 +61,17 @@ void eliminatorias::resolverEmpate(partido &p){
         }
     }
     p.setGoles(g1,g2);
+    salirFuncion(sizeof(int)*2 + sizeof(equipo*)*2);
 }
 
 void eliminatorias::simularFase(){
     cout<<"Fase: "<<fase<<endl;
 
+    entrarFuncion(sizeof(int)*3 + sizeof(equipo*)*2);
+
     for (int i = 0; i<numPartidos; i++){
+        iteraciones++;
+
         partidos[i].simular();
 
         resolverEmpate(partidos[i]);
@@ -72,14 +87,19 @@ void eliminatorias::simularFase(){
 
         cout << e1->getNombre()<<" "<<g1<<" - "<<g2<<" "<<e2->getNombre()<<endl;
     }
+    salirFuncion(sizeof(int)*3 + sizeof(equipo*)*2);
 }
 
 
 equipo* eliminatorias::obtenerGanadores(){
 
+    entrarFuncion(sizeof(int)*3 + sizeof(equipo*)*2);
+
     equipo* ganadores = new equipo [numPartidos];
+    sumarMemoriaHeap(sizeof(equipo) * numPartidos);
 
     for (int i = 0; i<numPartidos; i++){
+        iteraciones++;
 
         equipo* e1 = partidos[i].getEquipo1();
         equipo* e2 = partidos[i].getEquipo2();
@@ -88,21 +108,26 @@ equipo* eliminatorias::obtenerGanadores(){
         int g2 = partidos[i].getGoles2();
 
         if (g1 >= g2){
+            iteraciones++;
+
             ganadores [i] = *e1;
         }else{
             ganadores[i] = *e2;
         }
     }
+    salirFuncion(sizeof(int)*3 + sizeof(equipo*)*2);
     return ganadores;
 }
 
 void eliminatorias::generarSiguienteFase(eliminatorias &siguiente){
+
+    entrarFuncion(sizeof(equipo*));
     equipo* ganadores = obtenerGanadores();
 
     siguiente.setEquipos(ganadores, numPartidos);
     siguiente.crearCruces();
 
-    delete[] ganadores;
+    salirFuncion(sizeof(equipo*));
 }
 
 void eliminatorias::mostrarFase(){

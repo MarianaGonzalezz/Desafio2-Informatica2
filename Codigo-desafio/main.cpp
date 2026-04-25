@@ -1,5 +1,5 @@
 #include <iostream>
-#include "lectura.h"
+#include "utils.h"
 #include "torneo.h"
 
 using namespace std;
@@ -11,6 +11,27 @@ int main()
 
     torneo t;
     t.setEquipos(equipos, n);
-    t.iniciar();
+
+    resetearMedidor();
+    t.crearGrupos();
+    mostrarMedidor();
+
+    resetearMedidor();
+    t.simularFaseGrupos();
+    mostrarMedidor();
+
+    resetearMedidor();
+    t.prepararEliminatorias();
+    mostrarMedidor();
+
+    resetearMedidor();
+    t.simularEliminatorias();
+    mostrarMedidor();
+
+    guardarHistorialEquipos(equipos, n);
+
+    delete [] equipos;
+    restarMemoriaHeap(sizeof(equipo) * n);
+
     return 0;
 }

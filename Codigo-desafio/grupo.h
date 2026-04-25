@@ -23,7 +23,7 @@ public:
 ///Destructor
     ~grupo();
 
-    void agregarEquipo(equipo e);
+    void agregarEquipo(const equipo& e);
     void generarPartidos();
     void simularPartidos();
 

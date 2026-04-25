@@ -2,6 +2,7 @@
 #define EQUIPO_H
 
 #include "jugador.h"
+#include <fstream>
 #include <string>
 
 
@@ -47,6 +48,8 @@ public:
     void repartirGolesHistoricos();
 
     void mostrar() const;
+
+    void guardarHistorial(std::ofstream& archivo) const;
 
     jugador* getJugadores() const { return jugadores; }
     jugador& getJugador(int idx);

@@ -9,7 +9,7 @@ add_executable(Codigo-desafio main.cpp
     grupo.h grupo.cpp
     jugador.h jugador.cpp
     eliminatorias.h eliminatorias.cpp
-    lectura.h lectura.cpp
+    utils.h utils.cpp
     torneo.h torneo.cpp)
 
 include(GNUInstallDirs)

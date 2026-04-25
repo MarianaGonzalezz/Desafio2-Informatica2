@@ -71,7 +71,7 @@ void equipo::actualizarEstadisticas(int gf, int gc, int amarillas, int rojas,
     golesFavor+=gf;
     golesEnContra+=gc;
     tarjetasAmarillas+=amarillas;
-    tarjetasRojas=rojas;
+    tarjetasRojas+=rojas;
     faltas+=faltasPartido;
 
     if(ganado) partidosGanados++;
@@ -118,7 +118,17 @@ void equipo::mostrar() const {
     cout << "========================================\n";
 }
 
+void guardarHistorial(ofstream& archivo) const{
 
+    entrarF(sizeof(int) + sizeof(ofstream*));
+
+    for(int i = 0; i<cantidad; i++){
+        iteraciones++;
+        archivo<<pais<<","<<jugadores[i].getNombre()<<" "<<jugadores[i].getApellido()<<","
+                <<jugadores[i].getGoles<<","<<jugadores[i].getPartidosJugados()<<"\n";
+    }
+    salirF(sizeof(int) + sizeof(ofstream*));
+}
 
 jugador& equipo::getJugador(int idx){
     return jugadores[idx];
