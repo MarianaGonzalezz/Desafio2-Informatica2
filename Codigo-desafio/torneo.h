@@ -9,8 +9,10 @@
 class torneo
 {
 private:
+
     grupo* grupos;
     int numGrupos;
+    int equiposPorGrupo;
 
     equipo* equipos;
     int numEquipos;

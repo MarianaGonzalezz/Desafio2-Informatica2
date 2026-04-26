@@ -1,13 +1,16 @@
 #include "torneo.h"
+#include "grupo.h"
+#include "utils.h"
 #include <iostream>
 
 using namespace std;
 
 ///constructor
 torneo::torneo(){
-    grupos = new grupo[12];
-    numGrupos = 12;
-    sumarMemoriaHeap(sizeof(grupo) * 12);
+
+    grupos = nullptr;
+    numGrupos = 0;
+    equiposPorGrupo = 0;
 
     equipos = nullptr;
     numEquipos = 0;
@@ -22,9 +25,10 @@ torneo::torneo(){
 ///destructor
 torneo::~torneo() {
     delete [] grupos;
-    memoria -= sizeof(grupo) * numGrupos;
+    restarMemoriaHeap(sizeof(grupo) * numGrupos);
+
     delete [] fases;
-    memoria -= sizeof(eliminatorias) * numFases;
+    restarMemoriaHeap(sizeof(eliminatorias) * numFases);
 }
 
 void torneo::setEquipos(equipo *lista, int n){
@@ -36,6 +40,10 @@ void torneo::crearBombos(equipo** bombos){
 
     entrarF(sizeof(int)*3 + sizeof(equipo));
 
+    if (numEquipos != 48){
+        cout<<"ERROR: se esperan 48 equipos"<<endl;
+        return;
+    }
     for(int i=0; i < numEquipos -1;i++){
         iteraciones++;
 
@@ -46,7 +54,6 @@ void torneo::crearBombos(equipo** bombos){
                 iteraciones++;
 
                 equipo temp = equipos [j];
-                memoria += sizeof(equipo);
                 equipos[j]= equipos[j+1];
                 equipos[j+1] = temp;
             }
@@ -55,7 +62,7 @@ void torneo::crearBombos(equipo** bombos){
 
     for (int i = 0; i<4; i++){
         bombos[i] = new equipo[12];
-        memoria += sizeof(equipo) * 12;
+        sumarMemoriaHeap(sizeof(equipo) * 12);
 
     }
     int k = 0;
@@ -93,48 +100,75 @@ bool torneo::validarGrupo(grupo& g, equipo& e){
 
 void torneo::crearGrupos(){
 
-    entrarF(sizeof(char) + sizeof(int)*3 + sizeof(equipo*));
+    if(numEquipos<4){
+        cout<<"No hay suficientes equipos.\n";
+        return;
+    }
+
+    entrarF(sizeof(int) * 2 + sizeof(equipo*));
 
     equipo* bombos [4];
     crearBombos(bombos);
 
+    numGrupos = numEquipos / 4;
+    if(numEquipos % 4 != 0) numGrupos++;
+
+    grupos = new grupo[numGrupos];
+
+    sumarMemoriaHeap(sizeof(grupo)*numGrupos);
+
     char letra = 'A';
 
-    for(int i = 0; i<12;i++){
+    for(int i = 0; i<numGrupos;i++){
         grupos[i] = grupo(letra++);
     }
 
+    int* disponibles = new int[4]{12,12,12,12};
+
+
     for(int b= 0; b<4;b++){
         iteraciones++;
-
-        int disponibles = 12;
-        for(int g = 0; g<12;g++){
+        for(int g = 0; g<numGrupos;g++){
             iteraciones++;
 
             bool asignado = false;
 
-            while(!asignado){
+            if (disponibles[b] <= 0) break;
+
+            int intentos = 0;
+
+            while(!asignado && intentos < 100){
+
+                if(disponibles[b]<=0) break;
+
+                intentos++;
                 iteraciones++;
 
-                int r = rand()%disponibles;
+                int r = rand()%disponibles[b];
                 equipo candidato = bombos[b][r];
 
                 if(validarGrupo(grupos[g], candidato)){
+
                     grupos[g].agregarEquipo(candidato);
 
-                    bombos[b][r] = bombos[b][disponibles -1];
-                    disponibles--;
+                    bombos[b][r] = bombos[b][disponibles[b] -1];
+                    disponibles[b]--;
 
                     asignado = true;
                 }
             }
+            //if(!asignado){
+              //  cout<<"no se pudo asignar al grupo\n";
+            //}
         }
     }
+    delete[] disponibles;
+
     for (int i = 0; i<4; i++){
         delete[] bombos [i];
-        memoria -= sizeof(equipo) * 12;
+        restarMemoriaHeap(sizeof(equipo) * 12);
     }
-    salirF(sizeof(char) + sizeof(int)*3 + sizeof(equipo*));
+    salirF(sizeof(int) * 2 + sizeof(equipo*));
 }
 
 void torneo::simularFaseGrupos(){
@@ -144,7 +178,6 @@ void torneo::simularFaseGrupos(){
     for (int i = 0; i<numGrupos; i++){
         grupos[i].generarPartidos();
         grupos[i].simularPartidos();
-        grupos[i].calcularTabla();
         grupos[i].ordenarTabla();
 
         grupos[i].mostrarGrupo();
@@ -207,7 +240,7 @@ void torneo::prepararEliminatorias(){
     int aux = 0;
 
     // 1° y 2°
-    for(int i =0; i<12;i++){
+    for(int i =0; i<numGrupos;i++){
         iteraciones++;
         equipo* tabla = grupos[i].obtenerClasificados();
 
@@ -228,7 +261,7 @@ void torneo::prepararEliminatorias(){
     delete[] mejores;
     restarMemoriaHeap(sizeof(equipo) * 8);
 
-    fases[0] = eliminatorias("R16");
+    fases[0] = eliminatorias("\n=== R16 ===\n");
     fases[0].setEquipos(clasificados, 32);
     fases[0].crearCruces();
 
@@ -243,17 +276,17 @@ void torneo::simularEliminatorias(){
     fases[0].simularFase();
 
     //QF
-    fases[1] = eliminatorias("QF");
+    fases[1] = eliminatorias("\n=== QF ===\n");
     fases[0].generarSiguienteFase(fases[1]);
     fases[1].simularFase();
 
     //SF
-    fases[2] = eliminatorias("SF");
+    fases[2] = eliminatorias("\n=== SF ===\n");
     fases[1].generarSiguienteFase(fases[2]);
     fases[2].simularFase();
 
     //Final
-    fases[3] = eliminatorias ("FINAL");
+    fases[3] = eliminatorias ("\n=== FINAL ===\n");
     fases[2].generarSiguienteFase(fases[3]);
     fases[3].simularFase();
 
@@ -269,14 +302,14 @@ void torneo::mostrarEstadisticas(){
 
     //Campeon
     equipo* ganador = fases[3].obtenerGanadores();
-    cout << "CAMPEON: "<<ganador[0].getNombre()<<endl;
+    cout << "CAMPEON: "<<ganador[0].getpais()<<endl;
 
     delete[] ganador;
     restarMemoriaHeap(sizeof(equipo) * fases[3].getNumPartidos());
 
     //Subcampeon
     equipo* finalistas = fases [3].getEquipos();
-    cout<<"SUBCAMPEON: "<<finalistas[1].getNombre()<<endl;
+    cout<<"SUBCAMPEON: "<<finalistas[1].getpais()<<endl;
 
     //Equipo con mas goles
     int maxGoles = -1;
@@ -284,10 +317,10 @@ void torneo::mostrarEstadisticas(){
 
     for(int i = 0;i<numEquipos; i++){
         iteraciones++;
-        if(equipos[i].getGF()> maxGoles){
+        if(equipos[i].getGolesAFavor()> maxGoles){
             iteraciones++;
-            maxGoles = equipos[i].getGF();
-            mejorEquipo = equipos[i].getNombre();
+            maxGoles = equipos[i].getGolesAFavor();
+            mejorEquipo = equipos[i].getpais();
         }
     }
     cout<<"EQUIPO CON MAS GOLES: "<<mejorEquipo<<" ("<<maxGoles<<": goles\n";
@@ -298,13 +331,24 @@ void torneo::mostrarEstadisticas(){
 
 void torneo::iniciar(){
 
-    cout<<"=== INICIO DEL TORNEO ===\n";
-
+    cout<<"\n========================== Crear Grupos ==========================\n";
+    resetearMedidor();
     crearGrupos();
+    mostrarMedidor();
+
+    cout<<"\n========================== Simular Fase Grupos ==========================\n";
+    resetearMedidor();
     simularFaseGrupos();
+    mostrarMedidor();
 
+    cout<<"\n========================== Preparar Eliminatorias ==========================\n";
+    resetearMedidor();
     prepararEliminatorias();
-    simularEliminatorias();
+    mostrarMedidor();
 
-    cout<<"=== FIN DEL TORNEO ===";
+    cout<<"\n========================== Simular Eliminatorias ==========================\n";
+    resetearMedidor();
+    simularEliminatorias();
+    mostrarMedidor();
+
 }

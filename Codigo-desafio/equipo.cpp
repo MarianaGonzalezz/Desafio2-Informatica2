@@ -1,4 +1,5 @@
 #include "equipo.h"
+#include "utils.h"
 #include <iostream>
 #include <string>
 
@@ -97,6 +98,7 @@ void equipo::repartirGolesHistoricos(){
         if(golesjugador>0){
             jugadores[i].setGoles(golesjugador);
         }
+        jugadores[i].setPartidosJugados((rand()%10)+1);
     }
 }
 
@@ -118,16 +120,31 @@ void equipo::mostrar() const {
     cout << "========================================\n";
 }
 
-void guardarHistorial(ofstream& archivo) const{
+void equipo::guardarHistorial(ofstream& archivo) const{
 
-    entrarF(sizeof(int) + sizeof(ofstream*));
+    //cout << "Equipo: " << pais << " jugadores: " << cantidad << endl;
 
     for(int i = 0; i<cantidad; i++){
         iteraciones++;
         archivo<<pais<<","<<jugadores[i].getNombre()<<" "<<jugadores[i].getApellido()<<","
-                <<jugadores[i].getGoles<<","<<jugadores[i].getPartidosJugados()<<"\n";
+                <<jugadores[i].getGoles()<<","<<jugadores[i].getPartidosJugados()<<"\n";
     }
-    salirF(sizeof(int) + sizeof(ofstream*));
+}
+
+void equipo::actualizarResultado(int gf, int gc){
+    bool ganado = gf>gc;
+    bool empatado = gf == gc;
+    bool perdido = gf<gc;
+
+    actualizarEstadisticas(gf, gc, 0, 0, 0, ganado, empatado, perdido);
+}
+
+int equipo::getPuntos() const{
+    return partidosGanados * 3 + partidosEmpatados;
+}
+
+int equipo::getDiferenciaGoles() const{
+    return golesFavor - golesEnContra;
 }
 
 jugador& equipo::getJugador(int idx){

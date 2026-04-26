@@ -18,11 +18,11 @@ void resetearMedidor(){
 }
 
 void mostrarMedidor(){
-    cout<<"=== MEDICION ===\n";
+    cout<<"\n*********** MEDICION ***********\n";
     cout<<"ITERACIONES: "<< iteraciones<<endl;
     cout<<"MEMORIA TOTAL (bytes): "<< (memoriaHeap + memoriaStack)<<endl;
-    cout<<" - Heap: "<<memoriaHeap<<endl;
-    cout<<" - Stack: "<<memoriaStack<<endl;
+    cout<<"- Heap: "<<memoriaHeap<<endl;
+    cout<<"- Stack: "<<memoriaStack<<endl;
 }
 
 void sumarMemoriaHeap(unsigned long long bytes){
@@ -57,6 +57,7 @@ void guardarHistorialEquipos(equipo* equipos, int n){
     for(int i = 0; i<n; i++){
         iteraciones++;
 
+        equipos[i].repartirGolesHistoricos();
         equipos[i].guardarHistorial(archivo);
     }
     archivo.close();
@@ -83,11 +84,19 @@ equipo* cargarEquipos(string archivo, int &n){
 
     string linea;
 
+    getline(miArchivo, linea); // título
+    getline(miArchivo, linea);
+
     while(getline(miArchivo, linea)){
         iteraciones++;
+
         if(linea.empty()) continue;
 
+        if (linea.find(';') == string::npos) continue;
+
         if(n==capacidad){
+
+            int capacidadAnterior = capacidad;
             capacidad *=2;
 
             equipo* nuevo = new equipo [capacidad];
@@ -98,27 +107,53 @@ equipo* cargarEquipos(string archivo, int &n){
                 nuevo [i] = lista [i];
             }
 
-            restarMemoriaHeap(sizeof(equipo) * (capacidad/2));
             delete [] lista;
+            restarMemoriaHeap(sizeof(equipo) * (capacidadAnterior));
+
             lista = nuevo;
         }
 
         stringstream ss (linea);
-        string nombre, pais, conf, dato;
-        int ranking, gf, gc;
 
-        getline(ss,nombre, ',');
-        getline(ss,pais, ',');
-        getline(ss,conf, ',');
-        getline(ss,dato, ','); ranking = stoi(dato);
-        getline(ss,dato, ','); gf = stoi (dato);
-        getline(ss,dato, ','); gc = stoi (dato);
+        string rankingStr, pais, dt, fed, conf;
+        string gfStr,gcStr, pgStr,peStr,ppStr;
 
-        lista[n] = equipo (nombre, pais, ranking, conf);
-        lista[n].actualizarGoles(gf,gc);
+        getline(ss,rankingStr, ';');
+        getline(ss,pais, ';');
+        getline(ss,dt, ';');
+        getline(ss, fed, ';');
+        getline(ss,conf, ';');
+        getline(ss,gfStr, ';');
+        getline(ss,gcStr, ';');
+        getline(ss, pgStr, ';');
+        getline(ss, peStr, ';');
+        getline(ss, ppStr, ';');
+
+        try {
+        int ranking = stoi(rankingStr);
+        int gf = stoi(gfStr);
+        int gc = stoi(gcStr);
+
+        //cout << rankingStr << " | "<< pais << " | "<< dt << " | "<< fed << " | "<< conf << " | "<< gfStr << " | "<< gcStr << endl;
+
+        lista[n] = equipo(ranking, pais, fed, conf, gf, gc,
+            0, // partidos ganados
+            0, // empatados
+            0  // perdidos
+            );
+
+        lista[n].actualizarEstadisticas(gf, gc, 0, 0, 0, false, false, false);
 
         n++;
+    } catch (exception& e) {
+    cout << "ERROR en linea: " << linea << endl;
+    cout << "rankingStr: [" << rankingStr << "]\n";
+    cout << "gfStr: [" << gfStr << "]\n";
+    cout << "gcStr: [" << gcStr << "]\n";
+        }
+
     }
+
     miArchivo.close();
 
     salirF(sizeof(string) + sizeof(string)*4 + sizeof(stringstream) + sizeof(int)*3);

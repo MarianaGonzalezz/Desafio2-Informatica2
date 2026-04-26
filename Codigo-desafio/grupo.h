@@ -18,7 +18,10 @@ private:
 public:
 
 ///Contructor
+    grupo();
     grupo(char letra);
+    grupo(const grupo& otro);
+    grupo& operator=(const grupo& otro);
 
 ///Destructor
     ~grupo();
@@ -31,6 +34,11 @@ public:
 
     equipo* obtenerClasificados();
     void mostrarGrupo();
+
+
+    equipo* getEquipos() const;
+    int getNumEquipos() const;
+
 };
 
 #endif // GRUPO_H

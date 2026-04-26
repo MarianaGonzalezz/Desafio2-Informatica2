@@ -1,4 +1,6 @@
 #include "partido.h"
+#include "participacion.h"
+#include "utils.h"
 #include <iostream>
 #include <ctime>
 #include<cstdlib>
@@ -72,13 +74,22 @@ void partido::seleccionarConvocados(int indices1[11], int indices2[11]) const {
 
 
 void partido::crearParticipaciones(equipo* eq1, equipo* eq2) {
+    entrarF(sizeof(equipo*)*2);
+
     participacion1 = new participacion(eq1, this);
     participacion2 = new participacion(eq2, this);
+
+    sumarMemoriaHeap(sizeof(participacion)*2);
+
+    salirF(sizeof(equipo*)*2);
 }
 
 
 void partido::simular() {
-    srand((unsigned)time(nullptr));
+
+    entrarF(sizeof(int)*24 + sizeof(double)*2);
+
+    //srand((unsigned)time(nullptr));
 
     // 1. Calcular goles esperados
     int goles1 = (int)calcularGolesEsperados(participacion1->getEquipo(),
@@ -106,6 +117,8 @@ void partido::simular() {
 
    // simular tarjetas
     for (int i = 0; i < 11; i++) {
+        iteraciones++;
+
         int amar1 = 0, roj1 = 0, falt1 = 0;
         int amar2 = 0, roj2 = 0, falt2 = 0;
 
@@ -158,6 +171,7 @@ void partido::simular() {
     // Para equipo 1
     if (goles1 > 0) {
         for (int g = 0; g < goles1; g++) {
+            iteraciones++;
             int jugador = rand() % 11;
             int actual = participacion1->getGolesJugador(jugador);
             participacion1->setEstadisticasJugador(jugador, actual + 1,
@@ -170,6 +184,7 @@ void partido::simular() {
     // Para equipo 2
     if (goles2 > 0) {
         for (int g = 0; g < goles2; g++) {
+            iteraciones++;
             int jugador = rand() % 11;
             int actual = participacion2->getGolesJugador(jugador);
             participacion2->setEstadisticasJugador(jugador, actual + 1,
@@ -181,17 +196,23 @@ void partido::simular() {
 
     int golesFinales1 = 0, golesFinales2 = 0;
     for (int i = 0; i < 11; i++) {
+        iteraciones++;
         golesFinales1 += participacion1->getGolesJugador(i);
         golesFinales2 += participacion2->getGolesJugador(i);
     }
 
     participacion1->setEstadisticasPartido(golesFinales1, golesFinales2, pos1);
     participacion2->setEstadisticasPartido(golesFinales2, golesFinales1, pos2);
+
+     salirF(sizeof(int)*24 + sizeof(double)*2);
 }
 
 
 
 void partido::actualizarHistoricos() {
+
+    entrarF(sizeof(int)*6 + sizeof(equipo*)*2);
+
     participacion1->actualizarHistoricos();
     participacion2->actualizarHistoricos();
 
@@ -202,6 +223,8 @@ void partido::actualizarHistoricos() {
 
     int a1 = 0, r1 = 0, f1 = 0, a2 = 0, r2 = 0, f2 = 0;
     for (int i = 0; i < 11; i++) {
+        iteraciones++;
+
         a1 += participacion1->getTarjetasAmarillas(i);
         r1 += participacion1->getTarjetasRojas(i);
         f1 += participacion1->getFaltasJugador(i);
@@ -210,11 +233,15 @@ void partido::actualizarHistoricos() {
         f2 += participacion2->getFaltasJugador(i);
     }
 
-    eq1->actualizarEstadisticasEquipo(g1, g2, a1, r1, f1, g1 > g2, g1 == g2, g1 < g2);
-    eq2->actualizarEstadisticasEquipo(g2, g1, a2, r2, f2, g2 > g1, g2 == g1, g2 < g1);
+    eq1->actualizarEstadisticas(g1, g2, a1, r1, f1, g1 > g2, g1 == g2, g1 < g2);
+    eq2->actualizarEstadisticas(g2, g1, a2, r2, f2, g2 > g1, g2 == g1, g2 < g1);
+
+    salirF(sizeof(int)*6 + sizeof(equipo*)*2);
 }
 
 void partido::mostrarResultado() const {
+    entrarF(sizeof(equipo*));
+
     cout << "\n========================================\n";
     cout << "FECHA: " << fecha;
     if (!hora.empty()) cout << " - HORA: " << hora;
@@ -233,28 +260,30 @@ void partido::mostrarResultado() const {
 
     equipo* ganador = getGanador();
     if (ganador) {
-        cout << "GANADOR: " << ganador->getPais() << "\n";
+        cout << "GANADOR: " << ganador->getpais() << "\n";
     } else {
         cout << "EMPATE\n";
     }
     cout << "========================================\n";
+
+    salirF(sizeof(equipo*));
 }
 
 void partido::mostrarGoleadores() const {
     cout << "\n--- GOLEADORES DEL PARTIDO ---\n";
-    cout << participacion1->getEquipo()->getPais() << ":\n";
+    cout << participacion1->getEquipo()->getpais() << ":\n";
     for (int i = 0; i < 11; i++) {
         if (participacion1->getGolesJugador(i) > 0) {
             jugador* j = participacion1->getJugadorConvocado(i);
-            cout << "  #" << j->getNumeroCamiseta() << " - "
+            cout << "  #" << j->getnumeroCamiseta() << " - "
                  << participacion1->getGolesJugador(i) << " gol(es)\n";
         }
     }
-    cout << participacion2->getEquipo()->getPais() << ":\n";
+    cout << participacion2->getEquipo()->getpais() << ":\n";
     for (int i = 0; i < 11; i++) {
         if (participacion2->getGolesJugador(i) > 0) {
             jugador* j = participacion2->getJugadorConvocado(i);
-            cout << "  #" << j->getNumeroCamiseta() << " - "
+            cout << "  #" << j->getnumeroCamiseta() << " - "
                  << participacion2->getGolesJugador(i) << " gol(es)\n";
         }
     }

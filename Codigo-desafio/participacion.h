@@ -1,15 +1,16 @@
 #ifndef PARTICIPACION_H
 #define PARTICIPACION_H
 
-#include "equipo.h"
 #include "jugador.h"
 
+class equipo;
 class partido;
+
 
 class participacion{
 private:
-    equipo* equipo;
-    partido* partido;
+    equipo* equipoPtr;
+    partido* partidoPtr;
     int goles;
     int golesContra;
     double posesion;
@@ -53,3 +54,4 @@ public:
 };
 
 #endif // PARTICIPACION_H
+

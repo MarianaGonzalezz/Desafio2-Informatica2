@@ -11,17 +11,12 @@ jugador::jugador()
     asistencias(0), tarjetasAmarillas(0), tarjetasRojas(0), faltasAcumuladas(0) {}
 
 
-jugador::jugador(string nom, string ap, int num){
-
-    entrarF(sizeof(string)*2 + sizeof(int));
-
-    nombre(nom), apellido(ap), numeroCamiseta(num),
+jugador::jugador(string nom, string ap, int num)
+    : nombre(nom), apellido(ap), numeroCamiseta(num),
     partidosJugados(0), goles(0), minutosTotales(0),
     asistencias(0), tarjetasAmarillas(0), tarjetasRojas(0),
-    faltasAcumuladas(0)
+    faltasAcumuladas(0){}
 
-    salirF(sizeof(string)*2 + sizeof(int));
-}
 
 
 jugador::jugador(const jugador& otro)

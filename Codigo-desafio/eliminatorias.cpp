@@ -1,4 +1,7 @@
 #include "eliminatorias.h"
+#include "utils.h"
+#include "participacion.h"
+#include "partido.h"
 #include <iostream>
 
 
@@ -16,6 +19,17 @@ eliminatorias::eliminatorias(string nombreFase) {
 
 }
 
+eliminatorias::eliminatorias(){
+    fase = "";
+
+    clasificados = nullptr;
+    numEquipos = 0;
+
+    partidos = nullptr;
+    numPartidos = 0;
+
+}
+
 ///Destructor
 eliminatorias::~eliminatorias(){
     if(partidos != nullptr){
@@ -23,14 +37,20 @@ eliminatorias::~eliminatorias(){
         restarMemoriaHeap(sizeof(partido) * numPartidos);
     }
 
-    if(clasificados != nullptr){
+    /*if(clasificados != nullptr){
         delete[] clasificados;
         restarMemoriaHeap(sizeof(equipo) * numEquipos);
-    }
+    }*/
 }
 
 void eliminatorias::setEquipos(equipo* equipos, int n) {
-    clasificados = equipos;
+    clasificados = new equipo[n];
+    sumarMemoriaHeap(sizeof(equipo) * n);
+
+    for(int i = 0; i < n; i++){
+        clasificados[i] = equipos[i];
+    }
+
     numEquipos = n;
 }
 
@@ -40,18 +60,22 @@ void eliminatorias::crearCruces(){
     sumarMemoriaHeap(sizeof(partido) * numPartidos);
 
     for (int i = 0; i< numEquipos/2; i++){
-        partidos[i] = partido(&clasificados[i], &clasificados[numEquipos -1-i]);
+
+        partidos[i].crearParticipaciones(&clasificados[i], &clasificados[numEquipos -1-i]);
     }
 }
 
 void eliminatorias::resolverEmpate(partido &p){
-    entrarFuncion(sizeof(int)*2 + sizeof(equipo*)*2);
+    entrarF(sizeof(int)*2 + sizeof(equipo*)*2);
 
-    int g1 = p.getGoles1();
-    int g2 = p.getGoles2();
+    participacion* p1 = p.getParticipacion1();
+    participacion* p2 = p.getParticipacion2();
 
-    equipo* e1 = p.getEquipo1();
-    equipo* e2 = p.getEquipo2();
+    int g1 = p1->getGoles();
+    int g2 = p2->getGoles();
+
+    equipo* e1 = p1->getEquipo();
+    equipo* e2 = p2->getEquipo();
 
     if(g1==g2){
         if(e1->getRanking() < e2 -> getRanking()){
@@ -60,14 +84,18 @@ void eliminatorias::resolverEmpate(partido &p){
             g2++;
         }
     }
-    p.setGoles(g1,g2);
-    salirFuncion(sizeof(int)*2 + sizeof(equipo*)*2);
+
+    p1->setEstadisticasPartido(g1, g2, p1->getPosesion());
+    p2->setEstadisticasPartido(g2, g1, p2->getPosesion());
+
+    salirF(sizeof(int)*2 + sizeof(equipo*)*2);
 }
 
 void eliminatorias::simularFase(){
-    cout<<"Fase: "<<fase<<endl;
 
-    entrarFuncion(sizeof(int)*3 + sizeof(equipo*)*2);
+    cout<<fase<<endl;
+
+    entrarF(sizeof(int)*3 + sizeof(equipo*)*2);
 
     for (int i = 0; i<numPartidos; i++){
         iteraciones++;
@@ -76,24 +104,26 @@ void eliminatorias::simularFase(){
 
         resolverEmpate(partidos[i]);
 
-        equipo* e1 = partidos[i].getEquipo1();
-        equipo* e2 = partidos[i].getEquipo2();
+        participacion* p1 = partidos[i].getParticipacion1();
+        participacion* p2 = partidos[i].getParticipacion2();
 
-        int g1 = partidos[i].getGoles1();
-        int g2 = partidos[i].getGoles2();
+        equipo* e1 = p1->getEquipo();
+        equipo* e2 = p2->getEquipo();
 
-        e1 -> actualizarEstadisticas(g1,g2);
-        e2 -> actualizarEstadisticas(g2,g1);
+        int g1 = p1->getGoles();
+        int g2 = p2->getGoles();
 
-        cout << e1->getNombre()<<" "<<g1<<" - "<<g2<<" "<<e2->getNombre()<<endl;
+
+
+        cout << e1->getpais()<<" "<<g1<<" - "<<g2<<" "<<e2->getpais()<<endl;
     }
-    salirFuncion(sizeof(int)*3 + sizeof(equipo*)*2);
+    salirF(sizeof(int)*3 + sizeof(equipo*)*2);
 }
 
 
 equipo* eliminatorias::obtenerGanadores(){
 
-    entrarFuncion(sizeof(int)*3 + sizeof(equipo*)*2);
+    entrarF(sizeof(int)*3 + sizeof(equipo*)*2);
 
     equipo* ganadores = new equipo [numPartidos];
     sumarMemoriaHeap(sizeof(equipo) * numPartidos);
@@ -101,11 +131,14 @@ equipo* eliminatorias::obtenerGanadores(){
     for (int i = 0; i<numPartidos; i++){
         iteraciones++;
 
-        equipo* e1 = partidos[i].getEquipo1();
-        equipo* e2 = partidos[i].getEquipo2();
+        participacion* p1 = partidos[i].getParticipacion1();
+        participacion* p2= partidos[i].getParticipacion2();
 
-        int g1 = partidos[i].getGoles1();
-        int g2 = partidos[i].getGoles2();
+        equipo* e1 = p1->getEquipo();
+        equipo* e2 = p2->getEquipo();
+
+        int g1 = p1->getGoles();
+        int g2 = p2->getGoles();
 
         if (g1 >= g2){
             iteraciones++;
@@ -115,25 +148,28 @@ equipo* eliminatorias::obtenerGanadores(){
             ganadores[i] = *e2;
         }
     }
-    salirFuncion(sizeof(int)*3 + sizeof(equipo*)*2);
+
+    salirF(sizeof(int)*3 + sizeof(equipo*)*2);
     return ganadores;
 }
 
 void eliminatorias::generarSiguienteFase(eliminatorias &siguiente){
 
-    entrarFuncion(sizeof(equipo*));
+    entrarF(sizeof(equipo*));
     equipo* ganadores = obtenerGanadores();
 
     siguiente.setEquipos(ganadores, numPartidos);
+    delete[] ganadores;
+    restarMemoriaHeap(sizeof(equipo)*numPartidos);
+
     siguiente.crearCruces();
 
-    salirFuncion(sizeof(equipo*));
+    salirF(sizeof(equipo*));
 }
 
-void eliminatorias::mostrarFase(){
-    cout<<"Fase: "<< fase<< endl;
-
-    for (int i = 0; i<numPartidos; i++){
-        cout << partidos[i].getEquipo1()->getNombre()<<" vs "<< partidos[i].getEquipo2()->getNombre() << endl;
-    }
+int eliminatorias::getNumPartidos() const {
+    return numPartidos;
+}
+equipo* eliminatorias::getEquipos() const {
+    return clasificados;
 }

@@ -50,6 +50,7 @@ public:
     void mostrar() const;
 
     void guardarHistorial(std::ofstream& archivo) const;
+    void actualizarResultado(int gf, int gc);
 
     jugador* getJugadores() const { return jugadores; }
     jugador& getJugador(int idx);
@@ -70,6 +71,9 @@ public:
     int getTarjetasRojas() const;
     int getFaltas() const;
     int getCantidad() const;
+    int getPuntos() const;
+    int getDiferenciaGoles() const;
+
 
 
 };

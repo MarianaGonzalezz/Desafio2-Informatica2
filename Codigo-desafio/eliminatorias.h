@@ -8,6 +8,7 @@
 class eliminatorias
 {
 private:
+
     partido* partidos;
     int numPartidos;
 
@@ -18,7 +19,10 @@ private:
 
 public:
 
-    eliminatorias(string nombreFase); //Constructor
+    //Constructor
+    eliminatorias(string nombreFase);
+    eliminatorias();
+
     ~eliminatorias(); //Destructor
 
     void setEquipos(equipo* equipos, int n); //Setters
@@ -31,6 +35,9 @@ public:
 
     void mostrarFase();
     equipo* obtenerGanadores();
+
+    int getNumPartidos() const;
+    equipo* getEquipos() const;
 
 };
 

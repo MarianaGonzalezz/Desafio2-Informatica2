@@ -10,7 +10,11 @@ add_executable(Codigo-desafio main.cpp
     jugador.h jugador.cpp
     eliminatorias.h eliminatorias.cpp
     utils.h utils.cpp
-    torneo.h torneo.cpp)
+    torneo.h torneo.cpp
+    equipo.h equipo.cpp
+    participacion.h participacion.cpp
+    partido.h partido.cpp
+)
 
 include(GNUInstallDirs)
 install(TARGETS Codigo-desafio
